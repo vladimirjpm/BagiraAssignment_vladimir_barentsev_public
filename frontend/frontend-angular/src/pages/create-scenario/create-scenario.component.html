@@ -1,0 +1,50 @@
+<div class="create-scenario-page">
+  <div class="page-header">
+    <h1>Create Scenario</h1>
+  </div>
+
+  @if (error) {
+    <app-error-banner [message]="error"></app-error-banner>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="scenario-form">
+    <div class="form-group">
+      <label for="name">
+        Name <span class="required">*</span>
+      </label>
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        [class.error]="form.get('name')?.invalid && form.get('name')?.touched">
+      @if (form.get('name')?.invalid && form.get('name')?.touched) {
+        <span class="field-error">Name is required</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        rows="4">
+      </textarea>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="cancel()"
+        [disabled]="submitting">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="primary-button"
+        [disabled]="submitting || form.invalid">
+        {{ submitting ? 'Saving...' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</div>

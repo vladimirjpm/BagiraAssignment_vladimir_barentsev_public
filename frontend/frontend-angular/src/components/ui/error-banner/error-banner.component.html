@@ -1,0 +1,11 @@
+<div class="error-banner" data-testid="error-banner">
+  <div class="error-content">
+    <span class="error-icon">⚠️</span>
+    <span class="error-message">{{ message }}</span>
+  </div>
+  @if (onRetry) {
+    <button class="error-retry-button" (click)="handleRetry()">
+      Retry
+    </button>
+  }
+</div>
