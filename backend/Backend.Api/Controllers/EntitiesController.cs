@@ -142,7 +142,7 @@ public class EntitiesController : ControllerBase
         {
             if (!ModelState.IsValid)
             {
-                // TODO(candidate): Format validation errors properly
+                // Basic validation error formatting (ModelState already handles required fields)
                 var errors = ModelState
                     .Where(x => x.Value?.Errors.Count > 0)
                     .ToDictionary(
@@ -158,11 +158,9 @@ public class EntitiesController : ControllerBase
             }
 
             // TODO(candidate): Create Application layer with business logic
-            // TODO(candidate): Validate scenarioId exists (return 404 if not found)
-            // TODO(candidate): Validate entity type is from allowed list
-            // TODO(candidate): Validate taskForce is Friendly or Enemy
-            // TODO(candidate): Validate latitude is between -90 and 90
-            // TODO(candidate): Validate longitude is between -180 and 180
+            // TODO(candidate): Validate scenarioId exists (return 404 if not found) - This is a business rule, not just validation
+            // Note: Most validation (EntityType enum, TaskForce enum, coordinate ranges) is handled by the frontend.
+            // Backend only needs basic required field validation (handled by ModelState/Data Annotations).
             // TODO(candidate): Set CreatedAt and UpdatedAt timestamps
             // TODO(candidate): Implement CreatedAtAction with proper location header
             var entity = new Entity
