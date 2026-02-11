@@ -16,9 +16,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Register repositories
-// TODO(candidate): Replace with your chosen data storage implementation (Database, In-Memory, etc.)
-// TODO(candidate): Create Application layer with business logic services
+//TODO: Configure CORS for frontend communication
+// In-memory repository implementations (BONUS: replace with database)
 builder.Services.AddScoped<IScenarioRepository, ScenarioRepository>();
 builder.Services.AddScoped<IEntityRepository, EntityRepository>();
 
@@ -32,6 +31,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 

@@ -69,7 +69,7 @@ backend/
 - ✅ Dependency injection setup for repositories
 - ✅ Clear `TODO(candidate):` markers throughout
 
-**Note:** The repository implementations use in-memory storage (`List<T>`) with thread-safe operations. The candidate can replace this with a database implementation if desired, but it's not required for the assignment.
+**Note:** The repository implementations use in-memory storage (`List<T>`) with thread-safe operations. This is acceptable for the assignment. The candidate can optionally replace this with a database implementation as a bonus, but it's not required.
 
 ## What Needs to be Implemented
 
