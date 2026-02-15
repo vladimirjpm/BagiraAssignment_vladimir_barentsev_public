@@ -1,0 +1,45 @@
+<div class="scenario-list-page">
+  <div class="page-header">
+    <h1>Scenarios</h1>
+    <a routerLink="/scenarios/new" class="primary-button">Create Scenario</a>
+  </div>
+
+  @if (error) {
+    <app-error-banner [message]="error" [onRetry]="loadScenarios.bind(this)"></app-error-banner>
+  }
+
+  @if (loading) {
+    <app-loading-indicator></app-loading-indicator>
+  } @else if (scenarios.length === 0) {
+    <app-empty-state
+      message="No scenarios yet. Create your first scenario to get started."
+      actionLabel="Create Scenario">
+    </app-empty-state>
+  } @else {
+    <div class="scenarios-table-container">
+      <table class="scenarios-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Entity Count</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (scenario of scenarios; track scenario.id) {
+            <tr>
+              <td>{{ scenario.name }}</td>
+              <td class="description-cell">{{ scenario.description || '-' }}</td>
+              <td>{{ scenario.entityCount || 0 }}</td>
+              <td>{{ scenario.updatedAt ? (scenario.updatedAt | date) : '-' }}</td>
+              <td>
+                <a [routerLink]="['/scenarios', scenario.id]" class="action-button view">View</a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
