@@ -1,15 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { scenarioService } from '../services/scenarioService';
-import { entityService } from '../services/entityService';
-import { Scenario, Entity } from '../types';
+import { entityService, EntityFilterParams } from '../services/entityService';
+import { Scenario, Entity, EntityType, TaskForce } from '../types';
 import { LoadingIndicator } from '../components/ui/LoadingIndicator';
 import { EmptyState } from '../components/ui/EmptyState';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { EntityMapView } from '../components/EntityMapView';
 import './ScenarioDetailsPage.css';
+
+const ENTITY_TYPES: EntityType[] = ['Soldier', 'Tank', 'Drone', 'Aircraft', 'Vehicle', 'Civilian'];
+const TASK_FORCES: TaskForce[] = ['Friendly', 'Enemy'];
+
+type EntitySortField = 'name' | 'type' | 'taskForce' | 'latitude' | 'longitude' | 'updatedAt';
+type SortOrder = 'asc' | 'desc';
+type ViewMode = 'table' | 'map';
 
 /**
  * Scenario Details Page
+ * Displays scenario info and its entities with filtering, sorting, and map view.
+ * Filtering and sorting are performed server-side via query parameters.
  */
 export const ScenarioDetailsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +30,17 @@ export const ScenarioDetailsPage: React.FC = () => {
   const [entitiesLoading, setEntitiesLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [entitiesError, setEntitiesError] = useState<string | null>(null);
+
+  // Filter state
+  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [taskForceFilter, setTaskForceFilter] = useState<string>('');
+
+  // Sort state
+  const [sortBy, setSortBy] = useState<EntitySortField | ''>('');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+
+  // View mode
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   useEffect(() => {
     const loadData = async () => {
@@ -49,28 +70,48 @@ export const ScenarioDetailsPage: React.FC = () => {
     loadData();
   }, [id]);
 
-  useEffect(() => {
-    const loadEntities = async () => {
-      if (!id || !scenario) return;
+  const loadEntities = useCallback(async () => {
+    if (!id || !scenario) return;
 
-      setEntitiesLoading(true);
-      setEntitiesError(null);
+    setEntitiesLoading(true);
+    setEntitiesError(null);
 
-      try {
-        const entitiesData = await entityService.listEntitiesByScenario(id);
-        setEntities(entitiesData.filter(entity => entity.scenarioId === id));
-      } catch (err) {
-        setEntitiesError('Failed to load entities');
-      } finally {
-        setEntitiesLoading(false);
+    try {
+      const filters: EntityFilterParams = {};
+      if (typeFilter) filters.type = typeFilter;
+      if (taskForceFilter) filters.taskForce = taskForceFilter;
+      if (sortBy) {
+        filters.sortBy = sortBy;
+        filters.sortOrder = sortOrder;
       }
-    };
+      const entitiesData = await entityService.listEntitiesByScenario(id, filters);
+      setEntities(entitiesData);
+    } catch (err) {
+      setEntitiesError('Failed to load entities');
+    } finally {
+      setEntitiesLoading(false);
+    }
+  }, [id, scenario, typeFilter, taskForceFilter, sortBy, sortOrder]);
 
+  useEffect(() => {
     if (scenario) {
       loadEntities();
     }
-  }, [id, scenario]);
+  }, [scenario, loadEntities]);
 
+  const handleSort = (field: EntitySortField) => {
+    if (sortBy === field) {
+      setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const getSortIndicator = (field: EntitySortField) => {
+    if (sortBy !== field) return ' ↕';
+    return sortOrder === 'asc' ? ' ↑' : ' ↓';
+  };
 
   if (loading) {
     return <LoadingIndicator />;
@@ -106,34 +147,57 @@ export const ScenarioDetailsPage: React.FC = () => {
       <div className="entities-section">
         <div className="section-header">
           <h2>Entities</h2>
-          <button
-            className="primary-button"
-            onClick={() => navigate(`/scenarios/${id}/entities/new`)}
+          <div className="section-actions">
+            <div className="view-toggle">
+              <button
+                className={`toggle-button ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+              >
+                Table
+              </button>
+              <button
+                className={`toggle-button ${viewMode === 'map' ? 'active' : ''}`}
+                onClick={() => setViewMode('map')}
+              >
+                Map
+              </button>
+            </div>
+            <button
+              className="primary-button"
+              onClick={() => navigate(`/scenarios/${id}/entities/new`)}
+            >
+              Add Entity
+            </button>
+          </div>
+        </div>
+
+        <div className="entity-filters">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="filter-select"
           >
-            Add Entity
-          </button>
+            <option value="">All Types</option>
+            {ENTITY_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <select
+            value={taskForceFilter}
+            onChange={(e) => setTaskForceFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">All TaskForces</option>
+            {TASK_FORCES.map((tf) => (
+              <option key={tf} value={tf}>{tf}</option>
+            ))}
+          </select>
         </div>
 
         {entitiesError && (
           <ErrorBanner
             message={entitiesError}
-            onRetry={() => {
-              if (id) {
-                const loadEntities = async () => {
-                  setEntitiesLoading(true);
-                  setEntitiesError(null);
-                  try {
-                    const entitiesData = await entityService.listEntitiesByScenario(id);
-                    setEntities(entitiesData.filter(entity => entity.scenarioId === id));
-                  } catch (err) {
-                    setEntitiesError('Failed to load entities');
-                  } finally {
-                    setEntitiesLoading(false);
-                  }
-                };
-                loadEntities();
-              }
-            }}
+            onRetry={loadEntities}
           />
         )}
 
@@ -141,21 +205,35 @@ export const ScenarioDetailsPage: React.FC = () => {
           <LoadingIndicator />
         ) : entities.length === 0 ? (
           <EmptyState
-            message="No entities in this scenario yet. Add your first entity to get started."
+            message="No entities found. Add your first entity to get started."
             actionLabel="Add Entity"
             onAction={() => navigate(`/scenarios/${id}/entities/new`)}
           />
+        ) : viewMode === 'map' ? (
+          <EntityMapView entities={entities} />
         ) : (
           <div className="entities-table-container">
             <table className="entities-table">
               <thead>
                 <tr>
-                  <th>Type</th>
-                  <th>TaskForce</th>
-                  <th>Name</th>
-                  <th>Latitude</th>
-                  <th>Longitude</th>
-                  <th>Updated At</th>
+                  <th className="sortable-header" onClick={() => handleSort('type')}>
+                    Type{getSortIndicator('type')}
+                  </th>
+                  <th className="sortable-header" onClick={() => handleSort('taskForce')}>
+                    TaskForce{getSortIndicator('taskForce')}
+                  </th>
+                  <th className="sortable-header" onClick={() => handleSort('name')}>
+                    Name{getSortIndicator('name')}
+                  </th>
+                  <th className="sortable-header" onClick={() => handleSort('latitude')}>
+                    Latitude{getSortIndicator('latitude')}
+                  </th>
+                  <th className="sortable-header" onClick={() => handleSort('longitude')}>
+                    Longitude{getSortIndicator('longitude')}
+                  </th>
+                  <th className="sortable-header" onClick={() => handleSort('updatedAt')}>
+                    Updated At{getSortIndicator('updatedAt')}
+                  </th>
                 </tr>
               </thead>
               <tbody>

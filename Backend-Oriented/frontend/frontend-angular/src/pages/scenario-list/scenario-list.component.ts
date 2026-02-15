@@ -1,16 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ScenarioService } from '../../services/scenario.service';
+import { FormsModule } from '@angular/forms';
+import { ScenarioService, ScenarioFilterParams } from '../../services/scenario.service';
 import { Scenario } from '../../types';
 import { LoadingIndicatorComponent } from '../../components/ui/loading-indicator/loading-indicator.component';
 import { EmptyStateComponent } from '../../components/ui/empty-state/empty-state.component';
 import { ErrorBannerComponent } from '../../components/ui/error-banner/error-banner.component';
 
+type SortField = 'name' | 'description' | 'entityCount' | 'updatedAt';
+type SortOrder = 'asc' | 'desc';
+
 /**
  * Scenario List Component
- * TODO(candidate): Implement data fetching and binding to real data
- * TODO(candidate): Implement loading/empty/error states logic
+ * Displays all scenarios with filtering by name/description and sortable columns.
+ * Filtering and sorting are performed server-side via query parameters.
  */
 @Component({
   selector: 'app-scenario-list',
@@ -18,6 +22,7 @@ import { ErrorBannerComponent } from '../../components/ui/error-banner/error-ban
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     LoadingIndicatorComponent,
     EmptyStateComponent,
     ErrorBannerComponent
@@ -30,30 +35,60 @@ export class ScenarioListComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
+  // Filter state
+  nameFilter = '';
+  descriptionFilter = '';
+
+  // Sort state
+  sortBy: SortField | '' = '';
+  sortOrder: SortOrder = 'asc';
+
   constructor(private scenarioService: ScenarioService) {}
 
   ngOnInit() {
-    // this.loadScenarios();
+    this.loadScenarios();
   }
 
   loadScenarios() {
     this.loading = true;
     this.error = null;
-    
-    // this.scenarioService.listScenarios().subscribe({
-    //   next: (data) => {
-    //     this.scenarios = data;
-    //     this.loading = false;
-    //   },
-    //   error: (err) => {
-    //     this.error = 'Failed to load scenarios';
-    //     this.loading = false;
-    //   }
-    // });
+
+    const filters: ScenarioFilterParams = {};
+    if (this.nameFilter.trim()) filters.name = this.nameFilter.trim();
+    if (this.descriptionFilter.trim()) filters.description = this.descriptionFilter.trim();
+    if (this.sortBy) {
+      filters.sortBy = this.sortBy;
+      filters.sortOrder = this.sortOrder;
+    }
+
+    this.scenarioService.listScenarios(filters).subscribe({
+      next: (data) => {
+        this.scenarios = data;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Failed to load scenarios';
+        this.loading = false;
+      }
+    });
   }
 
+  onFilterChange() {
+    this.loadScenarios();
+  }
 
-  onCreateScenarioClick() {
-    // This will be handled by routerLink in template
+  handleSort(field: SortField) {
+    if (this.sortBy === field) {
+      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = field;
+      this.sortOrder = 'asc';
+    }
+    this.loadScenarios();
+  }
+
+  getSortIndicator(field: SortField): string {
+    if (this.sortBy !== field) return ' ↕';
+    return this.sortOrder === 'asc' ? ' ↑' : ' ↓';
   }
 }

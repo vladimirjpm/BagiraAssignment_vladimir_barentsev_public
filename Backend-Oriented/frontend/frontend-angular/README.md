@@ -15,16 +15,18 @@ src/
 │   ├── app.routes.ts
 │   └── app.config.ts
 ├── components/             # Reusable UI components
-│   ├── navigation/        # Main navigation component
+│   ├── navigation/        # Main navigation component with global search
+│   ├── entity-map-view/   # Leaflet map view for entities
 │   └── ui/                # UI state components (Loading, Empty, Error, Success)
 ├── pages/                 # Page components
-│   ├── scenario-list/
+│   ├── scenario-list/     # With filtering and sortable columns
 │   ├── create-scenario/
-│   ├── scenario-details/
+│   ├── scenario-details/  # With entity filtering, sorting, and map/table toggle
 │   └── create-entity/
-├── services/              # Service layer (stubs only)
-│   ├── scenario.service.ts
-│   └── entity.service.ts
+├── services/              # Service layer
+│   ├── scenario.service.ts  # Supports filter/sort query params
+│   ├── entity.service.ts    # Supports filter/sort query params
+│   └── search.service.ts    # Global search service
 ├── types/                 # TypeScript type definitions
 │   └── index.ts
 └── main.ts                # Entry point
@@ -36,23 +38,28 @@ src/
 
 - ✅ Complete routing structure for all screens
 - ✅ Navigation component with active route highlighting
+- ✅ Global search bar in navigation (calls backend search endpoint, debounced with RxJS, dropdown results)
 - ✅ All page layouts and forms (UI structure only)
-- ✅ Service layer interfaces with method signatures using RxJS Observables
+- ✅ Scenario list page with name/description filter inputs and sortable column headers
+- ✅ Scenario details page with entity type/taskForce filter dropdowns and sortable column headers
+- ✅ Table/Map view toggle on scenario details (Leaflet map with colored markers by TaskForce)
+- ✅ Service layer with filter/sort query parameter support using HttpParams
+- ✅ Search service for global search
+- ✅ Entity creation form with full client-side validation (Angular Reactive Forms)
 - ✅ UI state placeholder components (Loading, Empty, Error, Success)
 - ✅ TypeScript type definitions for Scenario and Entity
 - ✅ Angular Reactive Forms setup
+- ✅ Navigation guards for route validation
 - ✅ Basic styling and layout
 
 ## What Needs to be Implemented
 
 All functionality marked with `TODO(candidate):` comments needs to be implemented:
 
-1. **Service Layer**
-2. **Data Fetching**
-3. **Form Validation**
-4. **CRUD Operations**
-5. **Error Handling**
-6. **Navigation Guards**
+1. **Create Scenario Form** - Uncomment service call, implement proper validation, display server validation messages
+2. **Error Handling** - Improve error handling across all pages (toast notifications, retry logic)
+3. **UX Polish** - Add skeleton loaders, toast notifications, loading states during form submission
+4. **Leaflet Dependency** - Install `leaflet` and `@types/leaflet` npm packages for map view to work
 
 ## Key Requirements
 

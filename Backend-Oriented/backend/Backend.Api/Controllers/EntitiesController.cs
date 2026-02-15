@@ -1,13 +1,14 @@
-using Microsoft.AspNetCore.Mvc;
 using Backend.Api.DTOs;
 using Backend.Infrastructure.Interfaces;
-using Backend.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Api.Controllers;
 
 /// <summary>
 /// Controller for managing entities
 /// </summary>
+/// TODO(candidate): Implement proper error handling, validation and return codes.
+/// TODO(candidate): Implement all endpoints
 [ApiController]
 [Route("api/[controller]")]
 public class EntitiesController : ControllerBase
@@ -27,51 +28,21 @@ public class EntitiesController : ControllerBase
     }
 
     /// <summary>
-    /// Get all entities for a specific scenario
+    /// Get all entities for a specific scenario with optional filtering and sorting
     /// </summary>
+    /// <param name="scenarioId">The scenario ID</param>
+    /// <param name="filters">Optional filter and sort parameters</param>
+    /// <remarks>
+    /// Supports filtering by EntityType and TaskForce,
+    /// and sorting by name, type, taskForce, latitude, longitude, or updatedAt.
+    /// </remarks>
     [HttpGet("scenarios/{scenarioId}/entities")]
     [ProducesResponseType(typeof(IEnumerable<EntityDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<EntityDto>>> GetEntitiesByScenario(Guid scenarioId)
+    public async Task<ActionResult<IEnumerable<EntityDto>>> GetEntitiesByScenario(Guid scenarioId, [FromQuery] EntityFilterParams filters)
     {
-        try
-        {
-            // TODO(candidate): Create Application layer with business logic
-            // TODO(candidate): Implement proper 404 handling if scenario not found
-            // TODO(candidate): Map domain models to DTOs
-            var entities = await _entityRepository.GetByScenarioIdAsync(scenarioId);
-            var entityDtos = entities.Select(e => new EntityDto
-            {
-                Id = e.Id,
-                ScenarioId = e.ScenarioId,
-                Type = e.Type,
-                TaskForce = e.TaskForce,
-                Name = e.Name,
-                Latitude = e.Latitude,
-                Longitude = e.Longitude,
-                UpdatedAt = e.UpdatedAt
-            });
-            return Ok(entityDtos);
-        }
-        catch (NotImplementedException)
-        {
-            // TODO(candidate): Remove this catch block once logic is implemented
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Not implemented yet",
-                Errors = null
-            });
-        }
-        catch (Exception ex)
-        {
-            // TODO(candidate): Implement proper error handling
-            _logger.LogError(ex, "Error retrieving entities for scenario {ScenarioId}", scenarioId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "An error occurred while retrieving entities",
-                Errors = null
-            });
-        }
+        // TODO(candidate): Implement entity retrieval with filtering and sorting
+        return null;
     }
 
     /// <summary>
@@ -82,51 +53,8 @@ public class EntitiesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EntityDto>> GetEntityById(Guid entityId)
     {
-        try
-        {
-            // TODO(candidate): Create Application layer with business logic
-            // TODO(candidate): Implement proper 404 handling
-            var entity = await _entityRepository.GetByIdAsync(entityId);
-            if (entity == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Entity with id {entityId} not found",
-                    Errors = null
-                });
-            }
-            var entityDto = new EntityDto
-            {
-                Id = entity.Id,
-                ScenarioId = entity.ScenarioId,
-                Type = entity.Type,
-                TaskForce = entity.TaskForce,
-                Name = entity.Name,
-                Latitude = entity.Latitude,
-                Longitude = entity.Longitude,
-                UpdatedAt = entity.UpdatedAt
-            };
-            return Ok(entityDto);
-        }
-        catch (NotImplementedException)
-        {
-            // TODO(candidate): Remove this catch block once logic is implemented
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Not implemented yet",
-                Errors = null
-            });
-        }
-        catch (Exception ex)
-        {
-            // TODO(candidate): Implement proper error handling
-            _logger.LogError(ex, "Error retrieving entity {EntityId}", entityId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "An error occurred while retrieving the entity",
-                Errors = null
-            });
-        }
+        // TODO(candidate): Implement entity retrieval by ID
+        return null;
     }
 
     /// <summary>
@@ -138,78 +66,7 @@ public class EntitiesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EntityDto>> CreateEntity(Guid scenarioId, [FromBody] CreateEntityRequest request)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                // TODO(candidate): Format validation errors properly
-                var errors = ModelState
-                    .Where(x => x.Value?.Errors.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Validation failed",
-                    Errors = errors.ToDictionary(k => k.Key, v => v.Value)
-                });
-            }
-
-            // TODO(candidate): Create Application layer with business logic
-            // TODO(candidate): Validate scenarioId exists (return 404 if not found)
-            // TODO(candidate): Validate entity type is from allowed list
-            // TODO(candidate): Validate taskForce is Friendly or Enemy
-            // TODO(candidate): Validate latitude is between -90 and 90
-            // TODO(candidate): Validate longitude is between -180 and 180
-            // TODO(candidate): Set CreatedAt and UpdatedAt timestamps
-            // TODO(candidate): Implement CreatedAtAction with proper location header
-            var entity = new Entity
-            {
-                Id = Guid.NewGuid(),
-                ScenarioId = scenarioId,
-                Type = request.Type,
-                TaskForce = request.TaskForce,
-                Name = request.Name,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-            var createdEntity = await _entityRepository.AddAsync(entity);
-            var entityDto = new EntityDto
-            {
-                Id = createdEntity.Id,
-                ScenarioId = createdEntity.ScenarioId,
-                Type = createdEntity.Type,
-                TaskForce = createdEntity.TaskForce,
-                Name = createdEntity.Name,
-                Latitude = createdEntity.Latitude,
-                Longitude = createdEntity.Longitude,
-                UpdatedAt = createdEntity.UpdatedAt
-            };
-            return CreatedAtAction(nameof(GetEntityById), new { entityId = entityDto.Id }, entityDto);
-        }
-        catch (NotImplementedException)
-        {
-            // TODO(candidate): Remove this catch block once logic is implemented
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Not implemented yet",
-                Errors = null
-            });
-        }
-        catch (Exception ex)
-        {
-            // TODO(candidate): Implement proper error handling
-            _logger.LogError(ex, "Error creating entity for scenario {ScenarioId}", scenarioId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "An error occurred while creating the entity",
-                Errors = null
-            });
-        }
+        // TODO(candidate): Implement entity creation
+        return null;
     }
-
 }

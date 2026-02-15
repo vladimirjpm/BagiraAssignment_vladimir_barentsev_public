@@ -20,10 +20,14 @@ backend/
 ├── Backend.Api/              # Web API project
 │   ├── Controllers/          # API controllers
 │   │   ├── ScenariosController.cs
-│   │   └── EntitiesController.cs
+│   │   ├── EntitiesController.cs
+│   │   └── SearchController.cs
 │   ├── DTOs/                # Data Transfer Objects (temporary location)
 │   │   ├── Scenario DTOs
-│   │   └── Entity DTOs
+│   │   ├── Entity DTOs
+│   │   ├── ScenarioFilterParams.cs
+│   │   ├── EntityFilterParams.cs
+│   │   └── SearchResultDto.cs
 │   └── Program.cs           # Application entry point
 ├── Backend.Domain/           # Domain layer
 │   └── Models/              # Domain models and enums
@@ -44,14 +48,17 @@ backend/
 ## API Endpoints
 
 ### Scenarios
-- `GET /api/scenarios` - Get all scenarios
+- `GET /api/scenarios` - Get all scenarios (supports filtering by name/description, sorting by name/description/entityCount/updatedAt)
 - `GET /api/scenarios/{scenarioId}` - Get scenario by ID
 - `POST /api/scenarios` - Create a new scenario
 
 ### Entities
-- `GET /api/scenarios/{scenarioId}/entities` - Get all entities for a scenario
+- `GET /api/entities/scenarios/{scenarioId}/entities` - Get all entities for a scenario (supports filtering by type/taskForce, sorting by name/type/taskForce/latitude/longitude/updatedAt)
 - `GET /api/entities/{entityId}` - Get entity by ID
-- `POST /api/scenarios/{scenarioId}/entities` - Create a new entity
+- `POST /api/entities/scenarios/{scenarioId}/entities` - Create a new entity
+
+### Search
+- `GET /api/search?q={query}` - Global search across scenarios and entities
 
 **Note:** Update and Delete operations have been removed from the skeleton. The application supports Create and Read operations only. Update and Delete operations are Bonus
 
@@ -66,13 +73,22 @@ backend/
 - ✅ Error response shape (ErrorResponse)
 - ✅ Swagger/OpenAPI configuration
 - ✅ Dependency injection setup for repositories
+- ✅ Filter/Sort query parameter DTOs (ScenarioFilterParams, EntityFilterParams)
+- ✅ SearchController with search endpoint stub
+- ✅ SearchResultDto for combined search results
+- ✅ Controller signatures accept filter/sort parameters
 - ✅ Clear `TODO(candidate):` markers throughout
 
 ## What Needs to be Implemented
 
-1. All functionality marked with `TODO(candidate):` comments needs to be implemented:
-2. **Validation**
-3. **Error Handling**
+All functionality marked with `TODO(candidate):` comments needs to be implemented:
+
+1. **Repository Implementations** - Implement ScenarioRepository and EntityRepository with chosen data storage (In-Memory, Database, etc.)
+2. **Controller Logic** - Implement all endpoint bodies (currently return null)
+3. **Filtering & Sorting** - Implement server-side filtering and sorting logic in controllers
+4. **Search Logic** - Implement the search endpoint in SearchController
+5. **Validation** - Add proper validation attributes to DTOs and validate in controllers
+6. **Error Handling** - Implement proper error handling with appropriate HTTP status codes
 
 ## Key Requirements
 

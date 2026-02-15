@@ -1,8 +1,55 @@
-<nav class="navigation">
+<nav class="navigation" (document:click)="onDocumentClick($event)">
   <div class="nav-container">
     <a routerLink="/" class="nav-brand">Scenario Builder</a>
+
+    <div class="nav-search" #searchContainer>
+      <input
+        type="text"
+        placeholder="Search scenarios and entities..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchInput()"
+        (focus)="onSearchFocus()"
+        class="search-input" />
+      @if (searching) {
+        <span class="search-spinner"></span>
+      }
+
+      @if (showResults && searchResults) {
+        <div class="search-dropdown">
+          @if (totalResults === 0) {
+            <div class="search-no-results">No results found</div>
+          } @else {
+            @if (searchResults.scenarios.length > 0) {
+              <div class="search-section">
+                <div class="search-section-title">Scenarios</div>
+                @for (s of searchResults.scenarios; track s.id) {
+                  <div class="search-result-item" (click)="navigateTo('/scenarios/' + s.id)">
+                    <div class="search-result-name" [innerHTML]="highlightMatch(s.name, searchQuery)"></div>
+                    @if (s.description) {
+                      <div class="search-result-detail" [innerHTML]="highlightMatch(s.description, searchQuery)"></div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            @if (searchResults.entities.length > 0) {
+              <div class="search-section">
+                <div class="search-section-title">Entities</div>
+                @for (e of searchResults.entities; track e.id) {
+                  <div class="search-result-item" (click)="navigateTo('/scenarios/' + e.scenarioId)">
+                    <div class="search-result-name" [innerHTML]="highlightMatch(e.name, searchQuery)"></div>
+                    <div class="search-result-detail">{{ e.type }} &middot; {{ e.taskForce }}</div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+
     <div class="nav-links">
-      <a routerLink="/scenarios" 
+      <a routerLink="/scenarios"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{exact: false}">
         Scenarios

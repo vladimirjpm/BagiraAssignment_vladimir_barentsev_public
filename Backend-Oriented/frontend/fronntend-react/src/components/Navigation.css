@@ -12,6 +12,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1.5rem;
 }
 
 .nav-brand {
@@ -19,6 +20,7 @@
   font-weight: bold;
   color: white;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav-links {
@@ -40,4 +42,114 @@
 
 .nav-link.active {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Global Search */
+.nav-search {
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  transition: background-color 0.2s;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.search-input:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.search-spinner {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.search-no-results {
+  padding: 1rem;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.search-section {
+  border-bottom: 1px solid #eee;
+}
+
+.search-section:last-child {
+  border-bottom: none;
+}
+
+.search-section-title {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+  background-color: #f8f9fa;
+}
+
+.search-result-item {
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.search-result-item:hover {
+  background-color: #f0f7ff;
+}
+
+.search-result-name {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.search-result-detail {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 2px;
+}
+
+.search-result-item mark {
+  background-color: #fff3cd;
+  padding: 0 1px;
+  border-radius: 2px;
 }

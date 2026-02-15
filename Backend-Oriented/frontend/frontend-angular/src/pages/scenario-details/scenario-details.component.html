@@ -22,31 +22,82 @@
     <div class="entities-section">
       <div class="section-header">
         <h2>Entities</h2>
-        <a [routerLink]="['/scenarios', scenario.id, 'entities', 'new']" class="primary-button">Add Entity</a>
+        <div class="section-actions">
+          <div class="view-toggle">
+            <button
+              class="toggle-button"
+              [class.active]="viewMode === 'table'"
+              (click)="setViewMode('table')">
+              Table
+            </button>
+            <button
+              class="toggle-button"
+              [class.active]="viewMode === 'map'"
+              (click)="setViewMode('map')">
+              Map
+            </button>
+          </div>
+          <a [routerLink]="['/scenarios', scenario.id, 'entities', 'new']" class="primary-button">Add Entity</a>
+        </div>
+      </div>
+
+      <div class="entity-filters">
+        <select
+          [(ngModel)]="typeFilter"
+          (ngModelChange)="onFilterChange()"
+          class="filter-select">
+          <option value="">All Types</option>
+          @for (t of entityTypes; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+        <select
+          [(ngModel)]="taskForceFilter"
+          (ngModelChange)="onFilterChange()"
+          class="filter-select">
+          <option value="">All TaskForces</option>
+          @for (tf of taskForces; track tf) {
+            <option [value]="tf">{{ tf }}</option>
+          }
+        </select>
       </div>
 
       @if (entitiesError) {
-        <app-error-banner [message]="entitiesError" [onRetry]="loadEntities.bind(this, scenario.id)"></app-error-banner>
+        <app-error-banner [message]="entitiesError" [onRetry]="loadEntities.bind(this)"></app-error-banner>
       }
 
       @if (entitiesLoading) {
         <app-loading-indicator></app-loading-indicator>
       } @else if (entities.length === 0) {
         <app-empty-state
-          message="No entities in this scenario yet. Add your first entity to get started."
+          message="No entities found. Add your first entity to get started."
           actionLabel="Add Entity">
         </app-empty-state>
+      } @else if (viewMode === 'map') {
+        <app-entity-map-view [entities]="entities"></app-entity-map-view>
       } @else {
         <div class="entities-table-container">
           <table class="entities-table">
             <thead>
               <tr>
-                <th>Type</th>
-                <th>TaskForce</th>
-                <th>Name</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Updated At</th>
+                <th class="sortable-header" (click)="handleSort('type')">
+                  Type{{ getSortIndicator('type') }}
+                </th>
+                <th class="sortable-header" (click)="handleSort('taskForce')">
+                  TaskForce{{ getSortIndicator('taskForce') }}
+                </th>
+                <th class="sortable-header" (click)="handleSort('name')">
+                  Name{{ getSortIndicator('name') }}
+                </th>
+                <th class="sortable-header" (click)="handleSort('latitude')">
+                  Latitude{{ getSortIndicator('latitude') }}
+                </th>
+                <th class="sortable-header" (click)="handleSort('longitude')">
+                  Longitude{{ getSortIndicator('longitude') }}
+                </th>
+                <th class="sortable-header" (click)="handleSort('updatedAt')">
+                  Updated At{{ getSortIndicator('updatedAt') }}
+                </th>
               </tr>
             </thead>
             <tbody>

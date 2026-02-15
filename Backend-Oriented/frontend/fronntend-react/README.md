@@ -1,4 +1,4 @@
-# Scenario Builder - Frontend Skeleton
+# Scenario Builder - Frontend Skeleton (React)
 
 This is the frontend skeleton for the Scenario Builder application. It provides a complete UI structure with routing, components, and service interfaces, but leaves the implementation of business logic for the candidate.
 
@@ -12,15 +12,17 @@ The application will be available at `http://localhost:5173` (or the port shown 
 src/
 ├── components/          # Reusable UI components
 │   ├── ui/             # UI state components (Loading, Empty, Error, Success)
-│   └── Navigation.tsx  # Main navigation component
+│   ├── Navigation.tsx  # Main navigation component with global search
+│   └── EntityMapView.tsx # Leaflet map view for entities
 ├── pages/              # Page components
-│   ├── ScenarioListPage.tsx
+│   ├── ScenarioListPage.tsx    # With filtering and sortable columns
 │   ├── CreateScenarioPage.tsx
-│   ├── ScenarioDetailsPage.tsx
+│   ├── ScenarioDetailsPage.tsx # With entity filtering, sorting, and map/table toggle
 │   └── CreateEntityPage.tsx
-├── services/           # Service layer (stubs only)
-│   ├── scenarioService.ts
-│   └── entityService.ts
+├── services/           # Service layer
+│   ├── scenarioService.ts  # Supports filter/sort query params
+│   ├── entityService.ts    # Supports filter/sort query params
+│   └── searchService.ts    # Global search service
 ├── types/              # TypeScript type definitions
 │   └── index.ts
 ├── App.tsx             # Main app component with routing
@@ -32,23 +34,28 @@ src/
 ## What's Implemented
 
 - ✅ Complete routing structure for all screens
-- ✅ Navigation component
+- ✅ Navigation component with active route highlighting
+- ✅ Global search bar in navigation (calls backend search endpoint, debounced, dropdown results)
 - ✅ All page layouts and forms (UI structure only)
-- ✅ Service layer interfaces with method signatures
+- ✅ Scenario list page with name/description filter inputs and sortable column headers
+- ✅ Scenario details page with entity type/taskForce filter dropdowns and sortable column headers
+- ✅ Table/Map view toggle on scenario details (Leaflet map with colored markers by TaskForce)
+- ✅ Service layer with filter/sort query parameter support
+- ✅ Search service for global search
+- ✅ Entity creation form with full client-side validation
 - ✅ UI state placeholder components (Loading, Empty, Error, Success)
 - ✅ TypeScript type definitions for Scenario and Entity
+- ✅ Navigation guards for route validation
 - ✅ Basic styling and layout
 
 ## What Needs to be Implemented
 
 All functionality marked with `TODO(candidate):` comments needs to be implemented:
 
-1. **Service Layer**
-2. **Data Fetching**
-3. **Form Validation**
-4. **CRUD Operations**
-5. **Error Handling**
-6. **Navigation Guards**
+1. **Create Scenario Form** - Uncomment service call, implement proper validation, display server validation messages
+2. **Error Handling** - Improve error handling across all pages (toast notifications, retry logic)
+3. **UX Polish** - Add skeleton loaders, toast notifications, loading states during form submission
+4. **Leaflet Dependency** - Install `leaflet` and `@types/leaflet` npm packages for map view to work
 
 ## Key Requirements
 

@@ -159,3 +159,85 @@
 .primary-button:hover {
   background-color: #2980b9;
 }
+
+.section-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.toggle-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.toggle-button.active {
+  background-color: #3498db;
+  color: white;
+}
+
+.toggle-button:not(.active):hover {
+  background-color: #f0f0f0;
+}
+
+.entity-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  min-width: 160px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sortable-header:hover {
+  background-color: #e9ecef;
+}
+
+.map-container {
+  height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.entity-popup h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.entity-popup p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #555;
+}
