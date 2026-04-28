@@ -2,7 +2,7 @@ namespace Backend.Infrastructure.Interfaces;
 
 /// <summary>
 /// Generic repository interface for data access abstraction
-/// TODO(candidate): Implement concrete repository in Infrastructure layer
+/// TODO(candidate): Implement concrete repository in Infrastructure/Repositories layer
 /// </summary>
 /// <typeparam name="T">Entity type</typeparam>
 public interface IRepository<T> where T : class

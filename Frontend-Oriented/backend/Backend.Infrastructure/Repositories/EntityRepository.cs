@@ -4,57 +4,48 @@ using Backend.Domain.Models;
 namespace Backend.Infrastructure.Repositories;
 
 /// <summary>
-/// In-memory entity repository implementation
+/// Entity repository implementation
+/// TODO(candidate): Implement this repository with your chosen data storage (Database, In-Memory, etc.)
 /// </summary>
 public class EntityRepository : IEntityRepository
 {
-    private readonly List<Entity> _entities = new();
-    private readonly object _lock = new();
-    private readonly IScenarioRepository _scenarioRepository;
-
-    public EntityRepository(IScenarioRepository scenarioRepository)
-    {
-        _scenarioRepository = scenarioRepository;
-    }
-
+    /// <summary>
+    /// TODO(candidate): Implement entity retrieval by id
+    /// </summary>
     public Task<Entity?> GetByIdAsync(Guid id)
     {
-        lock (_lock)
-        {
-            var entity = _entities.FirstOrDefault(e => e.Id == id);
-            return Task.FromResult<Entity?>(entity);
-        }
+        throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// TODO(candidate): Implement entity retrieval
+    /// </summary>
     public Task<IEnumerable<Entity>> GetAllAsync()
     {
-        lock (_lock)
-        {
-            return Task.FromResult<IEnumerable<Entity>>(_entities.ToList());
-        }
+        throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// TODO(candidate): Implement entity creation
+    /// </summary>
     public Task<Entity> AddAsync(Entity entity)
     {
-        lock (_lock)
-        {
-            _entities.Add(entity);
-            return Task.FromResult(entity);
-        }
+        throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// TODO(candidate): Implement entity retrieval by scenario id
+    /// </summary>
     public Task<IEnumerable<Entity>> GetByScenarioIdAsync(Guid scenarioId)
     {
-        lock (_lock)
-        {
-            var entities = _entities.Where(e => e.ScenarioId == scenarioId).ToList();
-            return Task.FromResult<IEnumerable<Entity>>(entities);
-        }
+        throw new NotImplementedException();
     }
 
-    public async Task<bool> ScenarioExistsAsync(Guid scenarioId)
+    /// <summary>
+    /// TODO(candidate): Implement scenario existence check
+    /// </summary>
+    public Task<bool> ScenarioExistsAsync(Guid scenarioId)
     {
-        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);
-        return scenario != null;
+        throw new NotImplementedException();
     }
 }

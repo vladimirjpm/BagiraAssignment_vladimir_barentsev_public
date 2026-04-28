@@ -56,10 +56,11 @@ src/
 
 All functionality marked with `TODO(candidate):` comments needs to be implemented:
 
-1. **Create Scenario Form** - Uncomment service call, implement proper validation, display server validation messages
-2. **Error Handling** - Improve error handling across all pages (toast notifications, retry logic)
-3. **UX Polish** - Add skeleton loaders, toast notifications, loading states during form submission
-4. **Leaflet Dependency** - Install `leaflet` and `@types/leaflet` npm packages for map view to work
+1. **Scenario Service** - Implement `listScenarios()` and `createScenario()` in `src/services/scenario.service.ts` to make real API calls to your backend
+2. **Create Scenario Form** - Uncomment service call, implement proper validation, display server validation messages
+3. **Error Handling** - Improve error handling across all pages (toast notifications, retry logic)
+4. **UX Polish** - Add skeleton loaders, toast notifications, loading states during form submission
+5. **Leaflet Dependency** - Install `leaflet` and `@types/leaflet` npm packages for map view to work
 
 ## Key Requirements
 

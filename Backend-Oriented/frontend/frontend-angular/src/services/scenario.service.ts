@@ -26,13 +26,7 @@ export class ScenarioService {
    * TODO(candidate): Implement real API call
    */
   listScenarios(filters?: ScenarioFilterParams): Observable<Scenario[]> {
-    let params = new HttpParams();
-    if (filters?.name) params = params.set('name', filters.name);
-    if (filters?.description) params = params.set('description', filters.description);
-    if (filters?.sortBy) params = params.set('sortBy', filters.sortBy);
-    if (filters?.sortOrder) params = params.set('sortOrder', filters.sortOrder);
-
-    return this.http.get<Scenario[]>(this.baseUrl, { params });
+    throw new Error('NOT_IMPLEMENTED');
   }
 
   /**
@@ -47,6 +41,6 @@ export class ScenarioService {
    * TODO(candidate): Implement real API call
    */
   createScenario(payload: CreateScenarioPayload): Observable<Scenario> {
-    return this.http.post<Scenario>(this.baseUrl, payload);
+    throw new Error('NOT_IMPLEMENTED');
   }
 }
