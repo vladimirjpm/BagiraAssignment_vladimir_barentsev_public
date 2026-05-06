@@ -1,51 +1,47 @@
+using System.Collections.Concurrent;
 using Backend.Infrastructure.Interfaces;
 using Backend.Domain.Models;
 
 namespace Backend.Infrastructure.Repositories;
 
-/// <summary>
-/// Entity repository implementation
-/// TODO(candidate): Implement this repository with your chosen data storage (Database, In-Memory, etc.)
-/// </summary>
 public class EntityRepository : IEntityRepository
 {
-    /// <summary>
-    /// TODO(candidate): Implement entity retrieval by id
-    /// </summary>
+    internal static readonly ConcurrentDictionary<Guid, Entity> Store = new();
+
     public Task<Entity?> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        Store.TryGetValue(id, out var entity);
+        return Task.FromResult(entity);
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement entity retrieval
-    /// </summary>
     public Task<IEnumerable<Entity>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IEnumerable<Entity>>(Store.Values.ToList());
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement entity creation
-    /// </summary>
     public Task<Entity> AddAsync(Entity entity)
     {
-        throw new NotImplementedException();
+        if (entity.Id == Guid.Empty)
+            entity.Id = Guid.NewGuid();
+
+        var now = DateTime.UtcNow;
+        entity.CreatedAt = now;
+        entity.UpdatedAt = now;
+
+        Store[entity.Id] = entity;
+        return Task.FromResult(entity);
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement entity retrieval by scenario id
-    /// </summary>
     public Task<IEnumerable<Entity>> GetByScenarioIdAsync(Guid scenarioId)
     {
-        throw new NotImplementedException();
+        var entities = Store.Values
+            .Where(e => e.ScenarioId == scenarioId)
+            .ToList();
+        return Task.FromResult<IEnumerable<Entity>>(entities);
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement scenario existence check
-    /// </summary>
     public Task<bool> ScenarioExistsAsync(Guid scenarioId)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(ScenarioRepository.Store.ContainsKey(scenarioId));
     }
 }

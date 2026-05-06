@@ -1,6 +1,6 @@
-# Scenario Builder - Backend API Skeleton
+# Scenario Builder - Backend API
 
-This is the backend skeleton for the Scenario Builder application built with ASP.NET Web API. It provides a complete API structure with controllers, DTOs, and repository interfaces, but leaves the implementation of business logic and the Application layer for the candidate.
+This is the backend for the Scenario Builder application built with ASP.NET Web API. It provides domain models, repositories, DTOs with validation, and controller stubs. Your task is to implement the controller logic and configure CORS.
 
 ## Setup
 
@@ -57,33 +57,26 @@ backend/
 
 ## What's Implemented
 
-- ✅ Complete API controller structure with Create and Read endpoints
-- ✅ DTOs for all requests and responses (temporarily in API layer)
-- ✅ Domain models (Scenario, Entity) with enums (EntityType, TaskForce) in Domain layer
+- ✅ Complete API controller structure with Create and Read endpoint stubs
+- ✅ DTOs for all requests and responses
+- ✅ Domain models (Scenario, Entity) with enums (EntityType, TaskForce)
 - ✅ Repository interfaces (IRepository, IScenarioRepository, IEntityRepository)
-- ✅ **In-memory repository implementations** (ScenarioRepository and EntityRepository)
-- ✅ **Entity count calculation** in scenario list endpoint
-- ✅ Basic validation attributes on DTOs
+- ✅ In-memory repository implementations (ScenarioRepository and EntityRepository)
+- ✅ **DTO validation attributes** — `[Required]`, `[Range]`, `[MaxLength]`, `[EnumDataType]` on all request DTOs
+- ✅ **Automatic 400 responses** — invalid requests return `ErrorResponse` with field-level errors (no extra code needed)
+- ✅ **Enum string deserialization** — frontend can send `"Soldier"`, `"Friendly"` etc. as strings
 - ✅ Error response shape (ErrorResponse)
 - ✅ Swagger/OpenAPI configuration
 - ✅ Dependency injection setup for repositories
-- ✅ Clear `TODO(candidate):` markers throughout
-
-**Note:** The repository implementations use in-memory storage (`List<T>`) with thread-safe operations. This is acceptable for the assignment. The candidate can optionally replace this with a database implementation as a bonus, but it's not required.
 
 ## What Needs to be Implemented
 
-1. All functionality marked with `TODO(candidate):` comments needs to be implemented:
-2. **Basic Validation**
-3. **Proper Error Handling**
+1. **API Controllers** — implement the endpoint stubs in `ScenariosController` and `EntitiesController` (look for `return null;`)
+2. **Error Handling** — return `404 NotFound` (with an `ErrorResponse` body) when a scenario or entity is not found
+3. **CORS** — configure CORS in `Program.cs` (look for the `TODO` comment) to allow requests from your frontend origin
 
 ## Key Requirements
 
 - Entities must always belong to a Scenario (no orphan entities)
-- **Validation Note**: Most validation is handled client-side. The frontend validates:
-  - Latitude must be between -90 and 90
-  - Longitude must be between -180 and 180
-  - Entity types are fixed: Soldier, Tank, Drone, Aircraft, Vehicle, Civilian
-  - TaskForce must be Friendly or Enemy
-- Backend performs basic required field validation (handled by ModelState/Data Annotations)
-- Backend must validate scenario existence when creating entities (business rule)
+- Validate that a scenario exists before creating an entity under it (return `404` if it doesn't)
+- The connection between HTTP status codes, DTO validation, and error responses is already wired — focus on the controller logic

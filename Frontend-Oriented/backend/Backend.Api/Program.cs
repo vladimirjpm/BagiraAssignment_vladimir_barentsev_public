@@ -1,10 +1,35 @@
+using System.Text.Json.Serialization;
+using Backend.Api.DTOs;
 using Backend.Infrastructure.Interfaces;
 using Backend.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return new BadRequestObjectResult(new ErrorResponse
+            {
+                Message = "Validation failed.",
+                Errors = errors
+            });
+        };
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -17,13 +42,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 //TODO: Configure CORS for frontend communication
-// In-memory repository implementations (BONUS: replace with database)
 builder.Services.AddScoped<IScenarioRepository, ScenarioRepository>();
 builder.Services.AddScoped<IEntityRepository, EntityRepository>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

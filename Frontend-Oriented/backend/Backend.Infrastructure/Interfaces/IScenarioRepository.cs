@@ -4,7 +4,6 @@ namespace Backend.Infrastructure.Interfaces;
 
 /// <summary>
 /// Repository interface for Scenario data access
-/// TODO(candidate): Implement concrete repository in Infrastructure/Repositories layer
 /// </summary>
 public interface IScenarioRepository : IRepository<Scenario>
 {

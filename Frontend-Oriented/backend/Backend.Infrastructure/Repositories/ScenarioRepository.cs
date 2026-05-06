@@ -1,43 +1,40 @@
+using System.Collections.Concurrent;
 using Backend.Infrastructure.Interfaces;
 using Backend.Domain.Models;
 
 namespace Backend.Infrastructure.Repositories;
 
-/// <summary>
-/// Scenario repository implementation
-/// TODO(candidate): Implement this repository with your chosen data storage (Database, In-Memory, etc.)
-/// </summary>
 public class ScenarioRepository : IScenarioRepository
 {
-    /// <summary>
-    /// TODO(candidate): Implement scenario retrieval by id
-    /// </summary>
+    internal static readonly ConcurrentDictionary<Guid, Scenario> Store = new();
+
     public Task<Scenario?> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        Store.TryGetValue(id, out var scenario);
+        return Task.FromResult(scenario);
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement scenario retrieval
-    /// </summary>
     public Task<IEnumerable<Scenario>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IEnumerable<Scenario>>(Store.Values.ToList());
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement scenario creation
-    /// </summary>
-    public Task<Scenario> AddAsync(Scenario entity)
+    public Task<Scenario> AddAsync(Scenario scenario)
     {
-        throw new NotImplementedException();
+        if (scenario.Id == Guid.Empty)
+            scenario.Id = Guid.NewGuid();
+
+        var now = DateTime.UtcNow;
+        scenario.CreatedAt = now;
+        scenario.UpdatedAt = now;
+
+        Store[scenario.Id] = scenario;
+        return Task.FromResult(scenario);
     }
 
-    /// <summary>
-    /// TODO(candidate): Implement entity count retrieval for scenario
-    /// </summary>
     public Task<int> GetEntityCountAsync(Guid scenarioId)
     {
-        throw new NotImplementedException();
+        var count = EntityRepository.Store.Values.Count(e => e.ScenarioId == scenarioId);
+        return Task.FromResult(count);
     }
 }
