@@ -1,6 +1,6 @@
 # Runs the whole Scenario Builder stack: postgres + backend API + frontend (nginx).
 # Start with:  docker compose up --build
-# Then open:   http://localhost:8080
+# Then open:   http://localhost:8765
 services:
   postgres:
     image: postgres:16-alpine
@@ -11,7 +11,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U scenariouser -d scenariodb"]
@@ -29,7 +29,7 @@ services:
       - Storage__Provider=postgres
       - ConnectionStrings__Default=Host=postgres;Database=scenariodb;Username=scenariouser;Password=scenariopass
       # CORS is a safety net only — the frontend is served same-origin via nginx.
-      - Cors__AllowedOrigins__0=http://localhost:8080
+      - Cors__AllowedOrigins__0=http://localhost:8765
     expose:
       - "8080"
     depends_on:
@@ -42,7 +42,7 @@ services:
       context: ./frontend/fronntend-react
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8765:80"
     depends_on:
       - backend
     restart: unless-stopped
