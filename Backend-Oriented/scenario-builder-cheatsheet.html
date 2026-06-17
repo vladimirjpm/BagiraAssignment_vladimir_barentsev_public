@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scenario Builder — Шпаргалка для защиты</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
+    h1 { font-size: 1.75rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.25rem; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
+
+    h2.section { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin: 2rem 0 0.75rem; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    .card h2 { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 1rem; }
+
+    .stack-row { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px solid #1e293b; font-size: 0.88rem; }
+    .stack-row:last-child { border-bottom: none; }
+    .stack-label { color: #94a3b8; }
+    .stack-value { color: #e2e8f0; font-weight: 500; }
+
+    .cmd-block { background: #0f172a; border: 1px solid #1e3a5f; border-radius: 8px; padding: 1rem; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; line-height: 2; overflow-x: auto; }
+    .cmd-comment { color: #475569; }
+    .cmd-text { color: #38bdf8; white-space: pre; }
+
+    .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .flow-box { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.5rem 0.85rem; font-size: 0.82rem; color: #e2e8f0; }
+    .flow-box.blue   { background: #0c1a3a; border-color: #1e40af; color: #93c5fd; }
+    .flow-box.green  { background: #052e16; border-color: #166534; color: #4ade80; }
+    .flow-box.purple { background: #1a0a2e; border-color: #6d28d9; color: #c4b5fd; }
+    .flow-box.amber  { background: #1c1008; border-color: #854d0e; color: #fbbf24; }
+    .flow-arrow { color: #475569; font-size: 0.9rem; }
+
+    .task { font-size: 0.82rem; padding-left: 1.2rem; position: relative; color: #94a3b8; line-height: 1.7; }
+    .task::before { content: '·'; position: absolute; left: 0.3rem; color: #475569; }
+    .task.key { color: #e2e8f0; }
+    .task.key::before { content: '▸'; color: #3b82f6; }
+
+    .decision { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid #1e293b; font-size: 0.84rem; }
+    .decision:last-child { border-bottom: none; }
+    .dec-q { color: #64748b; min-width: 200px; flex-shrink: 0; }
+    .dec-a { color: #e2e8f0; font-weight: 500; }
+    .dec-why { color: #475569; font-size: 0.78rem; margin-top: 0.15rem; }
+
+    .scale-step { display: flex; align-items: flex-start; gap: 1rem; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+    .scale-num { min-width: 2rem; height: 2rem; border-radius: 50%; background: #1e40af; color: #93c5fd; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+    .scale-body h3 { font-size: 0.95rem; font-weight: 600; color: #93c5fd; margin-bottom: 0.3rem; }
+    .scale-body p { font-size: 0.82rem; color: #64748b; line-height: 1.6; }
+    .scale-body code { color: #38bdf8; background: rgba(0,0,0,0.3); padding: 0.05rem 0.3rem; border-radius: 3px; font-family: 'Cascadia Code', monospace; font-size: 0.8rem; }
+
+    .iface-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.45rem 0; border-bottom: 1px solid #1e293b; font-size: 0.85rem; font-family: 'Cascadia Code', monospace; gap: 1rem; }
+    .iface-row:last-child { border-bottom: none; }
+    .iface-name { color: #fbbf24; flex-shrink: 0; }
+    .iface-note { color: #64748b; font-size: 0.78rem; text-align: right; }
+
+    .method { display:inline-block; min-width: 3.2rem; text-align:center; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.72rem; font-weight: 700; margin-right: 0.5rem; }
+    .method.get  { background:#052e16; color:#4ade80; border:1px solid #166534; }
+    .method.post { background:#0c1a3a; color:#93c5fd; border:1px solid #1e40af; }
+    .method.put { background:#3a2c0c; color:#fbbf24; border:1px solid #92400e; }
+    .method.delete { background:#3a0c0c; color:#fca5a5; border:1px solid #991b1b; }
+
+    .chip { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 500; margin: 0.15rem 0.15rem 0 0; }
+    .chip.ok   { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+    .chip.blue { background: #0c1a3a; color: #93c5fd; border: 1px solid #1e40af; }
+    .chip.warn { background: #1c1008; color: #fbbf24; border: 1px solid #854d0e; }
+
+    .todo { background:#1c1008; border:1px solid #854d0e; color:#fbbf24; border-radius:8px; padding:0.85rem 1rem; font-size:0.82rem; line-height:1.6; margin-bottom:1rem; }
+    .todo strong { color:#fde68a; }
+    code.inline { color:#c4b5fd; background:rgba(0,0,0,0.3); padding:0.05rem 0.3rem; border-radius:3px; font-family:'Cascadia Code',monospace; font-size:0.8rem; }
+  </style>
+</head>
+<body>
+
+  <h1>Scenario Builder — Шпаргалка для защиты</h1>
+  <p class="subtitle">.NET 10 Web API · Clean Architecture · In-memory → DB-ready · React + Vite · Docker Compose · xUnit</p>
+
+  <div class="todo">
+    <strong>Статус:</strong> реализованы и проверены <strong>Phase 1 (сценарии)</strong> и <strong>Phase 2 (сущности)</strong> — CRUD, server-side фильтр + сортировка, валидация, единый <code class="inline">ErrorResponse</code>, no-orphan, реальный <code class="inline">entityCount</code>, связка фронт↔бэк через vite-proxy.
+    Осталось: <strong>глобальный поиск</strong> (<code class="inline">/api/search</code>), <strong>Docker</strong> (compose/nginx), мелкий полиш сообщения при невалидном enum, опц. тесты.
+    Блоки <span class="chip warn">в плане</span> ещё не сделаны.
+  </div>
+
+  <!-- STACK -->
+  <h2 class="section">Стек</h2>
+  <div class="grid2">
+    <div class="card">
+      <h2>Технологии</h2>
+      <div class="stack-row"><span class="stack-label">Backend runtime</span><span class="stack-value">.NET 10 ASP.NET Core Web API (LTS)</span></div>
+      <div class="stack-row"><span class="stack-label">Архитектура</span><span class="stack-value">Clean Architecture (Domain / Application / Infrastructure / Api)</span></div>
+      <div class="stack-row"><span class="stack-label">Хранилище</span><span class="stack-value">In-memory за интерфейсами (DB-ready)</span></div>
+      <div class="stack-row"><span class="stack-label">Валидация</span><span class="stack-value">DataAnnotations (атрибуты на record-параметрах) + доменные фабрики</span></div>
+      <div class="stack-row"><span class="stack-label">Документация API</span><span class="stack-value">Swagger / OpenAPI</span></div>
+      <div class="stack-row"><span class="stack-label">Frontend</span><span class="stack-value">React + TypeScript + Vite</span></div>
+      <div class="stack-row"><span class="stack-label">Контейнеризация</span><span class="stack-value">Docker + docker-compose (multi-stage)</span></div>
+      <div class="stack-row"><span class="stack-label">Тесты</span><span class="stack-value">xUnit (валидация + контроллеры)</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Ключевые решения</h2>
+      <div class="decision">
+        <span class="dec-q">Clean Architecture в 4 слоя</span>
+        <div><div class="dec-a">Domain не зависит ни от чего; зависимости направлены внутрь</div></div>
+      </div>
+      <div class="decision">
+        <span class="dec-q">In-memory за IRepositoryInterface</span>
+        <div><div class="dec-a">Переход на EF Core + Postgres = новый класс в Infrastructure, без правок логики</div></div>
+      </div>
+      <div class="decision">
+        <span class="dec-q">Фильтрация/сортировка на сервере</span>
+        <div><div class="dec-a">В Acceptance Criteria — значит required, а не bonus</div></div>
+      </div>
+      <div class="decision">
+        <span class="dec-q">DTO ≠ доменная модель</span>
+        <div><div class="dec-a">Контракт API не течёт во внутреннюю модель; валидация на входе</div></div>
+      </div>
+      <div class="decision">
+        <span class="dec-q">Контракт фиксирован фронтом</span>
+        <div><div class="dec-a">URL и поля заданы сервисами React — бэкенд обязан совпасть точно</div></div>
+      </div>
+      <div class="decision">
+        <span class="dec-q">Docker помечен критичным (***)</span>
+        <div><div class="dec-a"><code class="inline">docker-compose up</code> поднимает оба сервиса; ENV для API URL и CORS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <h2 class="section">Архитектура — слои и направление зависимостей</h2>
+  <div class="card">
+    <h2>Clean Architecture — кто от кого зависит</h2>
+    <div class="flow">
+      <div class="flow-box blue">Backend.Api<br><span style="color:#64748b;font-size:0.72rem">Controllers, DTO, DI, CORS, Swagger</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">Application<br><span style="color:#64748b;font-size:0.72rem">сервисы, интерфейсы репозиториев, валидация</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box purple">Domain<br><span style="color:#64748b;font-size:0.72rem">Scenario, Entity, enums — ядро</span></div>
+    </div>
+    <div class="flow">
+      <div class="flow-box amber">Infrastructure<br><span style="color:#64748b;font-size:0.72rem">InMemory*Repository (потом EF Core)</span></div>
+      <div class="flow-arrow">— реализует интерфейсы из →</div>
+      <div class="flow-box green">Application</div>
+    </div>
+    <div style="margin-top:0.75rem;font-size:0.8rem;color:#475569">
+      Правило зависимостей: стрелки указывают <strong style="color:#94a3b8">внутрь</strong>. Domain не знает ни про API, ни про БД, ни про Infrastructure.
+      Infrastructure зависит от абстракций Application (Dependency Inversion), а не наоборот.
+    </div>
+  </div>
+  <div class="card">
+    <h2>Поток одного запроса — GET /api/scenarios?name=...</h2>
+    <div class="flow">
+      <div class="flow-box blue">ScenariosController</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">ScenarioService.List(filter)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">IScenarioRepository</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box amber">InMemoryScenarioRepository</div>
+    </div>
+    <div class="flow">
+      <div class="flow-box amber">List&lt;Scenario&gt; (фильтр/сортировка)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box green">маппинг в ScenarioDto</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">200 OK + JSON</div>
+    </div>
+  </div>
+
+  <!-- API CONTRACT -->
+  <h2 class="section">API-контракт — зафиксирован сервисами фронтенда</h2>
+  <div class="card">
+    <h2>Endpoints (бэкенд обязан совпасть точно)</h2>
+    <div class="iface-row"><span class="iface-name"><span class="method get">GET</span>/api/scenarios?name=&amp;description=&amp;sortBy=&amp;sortOrder=</span><span class="iface-note">список + фильтр/сортировка (server-side)</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method get">GET</span>/api/scenarios/{id}</span><span class="iface-note">один сценарий · 404 если нет</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method post">POST</span>/api/scenarios</span><span class="iface-note">создать · body: {name, description?}</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method put">PUT</span>/api/scenarios/{id}</span><span class="iface-note">обновить · та же валидация · 404 если нет</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method delete">DELETE</span>/api/scenarios/{id}</span><span class="iface-note">удалить · каскад на сущности сценария</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method get">GET</span>/api/entities/scenarios/{id}/entities?type=&amp;taskForce=&amp;sortBy=&amp;sortOrder=</span><span class="iface-note">сущности сценария + фильтр</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method get">GET</span>/api/entities/{id}</span><span class="iface-note">одна сущность · 404 если нет</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method post">POST</span>/api/entities/scenarios/{id}/entities</span><span class="iface-note">создать сущность в сценарии</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method put">PUT</span>/api/entities/{id}</span><span class="iface-note">обновить · та же валидация · 404 если нет</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method delete">DELETE</span>/api/entities/{id}</span><span class="iface-note">удалить</span></div>
+    <div class="iface-row"><span class="iface-name"><span class="method get">GET</span>/api/search?q=...</span><span class="iface-note">{ scenarios:[], entities:[] } — реализован, OR по name/description</span></div>
+    <div style="margin-top:0.75rem;font-size:0.8rem;color:#475569">
+      Путь сущностей <strong style="color:#94a3b8">нестандартный</strong> — <code class="inline">/api/entities/scenarios/{id}/entities</code>, не <code class="inline">/api/scenarios/{id}/entities</code>.
+      Так заданы сервисы фронта (<code class="inline">entityService.ts</code>), и роутинг контроллера должен это повторить, иначе фронт получит 404.
+    </div>
+  </div>
+
+  <!-- DATA RULES -->
+  <h2 class="section">Data Rules и валидация — из задания</h2>
+  <div class="card">
+    <div class="iface-row"><span class="iface-name">EntityType</span><span class="iface-note">Soldier · Tank · Drone · Aircraft · Vehicle · Civilian</span></div>
+    <div class="iface-row"><span class="iface-name">TaskForce</span><span class="iface-note">Friendly · Enemy</span></div>
+    <div class="iface-row"><span class="iface-name">Latitude</span><span class="iface-note">от -90 до 90</span></div>
+    <div class="iface-row"><span class="iface-name">Longitude</span><span class="iface-note">от -180 до 180</span></div>
+    <div class="iface-row"><span class="iface-name">Entity → Scenario</span><span class="iface-note">всегда ровно один сценарий, без сирот</span></div>
+    <div class="iface-row"><span class="iface-name">Scenario.name</span><span class="iface-note">обязателен · description опционален</span></div>
+    <div style="margin-top:0.75rem;font-size:0.8rem;color:#475569">
+      Валидация на входе (DTO) → при ошибке <strong style="color:#94a3b8">400 + ErrorResponse</strong>; отсутствие ресурса → <strong style="color:#94a3b8">404 + ErrorResponse</strong>.
+      Создание сущности в несуществующем сценарии → 404 (нет сироты).
+    </div>
+  </div>
+
+  <!-- SOLID -->
+  <h2 class="section">SOLID — где что применено</h2>
+  <div class="card">
+    <div class="iface-row"><span class="iface-name">SRP</span><span class="iface-note">Controller только HTTP · Service только логика · Repository только доступ к данным · Validator только проверка</span></div>
+    <div class="iface-row"><span class="iface-name">OCP</span><span class="iface-note">EF Core репозиторий = новый класс реализующий тот же интерфейс, существующий код не трогаем</span></div>
+    <div class="iface-row"><span class="iface-name">LSP</span><span class="iface-note">InMemory- и EfCore-репозиторий взаимозаменяемы — Service не заметит подмены</span></div>
+    <div class="iface-row"><span class="iface-name">ISP</span><span class="iface-note">IScenarioRepository · IEntityRepository — узкие интерфейсы под свою сущность, не один God-repository</span></div>
+    <div class="iface-row"><span class="iface-name">DIP</span><span class="iface-note">Application зависит от интерфейсов; конкретные репозитории внедряются через DI в Api</span></div>
+  </div>
+
+  <!-- SCALING -->
+  <h2 class="section">Масштабирование — путь in-memory → production</h2>
+
+  <div class="scale-step">
+    <div class="scale-num">1</div>
+    <div class="scale-body">
+      <h3>In-memory → реальная БД (главный заготовленный шаг)</h3>
+      <p>
+        Сейчас данные лежат в <code>InMemoryStore</code> (Singleton, два <code>ConcurrentDictionary</code>), а <code>InMemory*Repository</code> читают из него. Переход на БД =
+        написать <code>EfCoreScenarioRepository : IScenarioRepository</code> + <code>DbContext</code>, поменять <strong style="color:#e2e8f0">регистрацию в <code>AddInfrastructure()</code></strong>.
+        Domain, Application и контроллеры не меняются (DIP + OCP). Это и есть смысл «DB-ready».
+      </p>
+    </div>
+  </div>
+
+  <div class="scale-step">
+    <div class="scale-num">2</div>
+    <div class="scale-body">
+      <h3>Пагинация и индексы</h3>
+      <p>
+        Фильтрация уже server-side. При росте данных добавляем <code>?page=&amp;pageSize=</code> и переносим
+        фильтр/сортировку в SQL (<code>IQueryable</code>), чтобы не тянуть всю таблицу в память. На БД — индексы по полям фильтрации (name, type, taskForce).
+      </p>
+    </div>
+  </div>
+
+  <div class="scale-step">
+    <div class="scale-num">3</div>
+    <div class="scale-body">
+      <h3>Горизонтальное масштабирование API</h3>
+      <p>
+        После выноса состояния в БД API становится stateless — можно поднять N реплик за load balancer.
+        In-memory вариант этого не позволяет (состояние в процессе), поэтому БД — предусловие для масштабирования вширь.
+      </p>
+    </div>
+  </div>
+
+  <!-- DEFENSE Q&A -->
+  <h2 class="section">Вопросы на защите — готовые ответы</h2>
+  <div class="card">
+    <div class="decision">
+      <span class="dec-q">Почему Clean Architecture, а не один проект?</span>
+      <div>
+        <div class="dec-a">Разделение ответственности + тестируемость + замена хранилища без боли</div>
+        <div class="dec-why">Domain в центре, зависимости направлены внутрь. БД, веб и фреймворк — детали на краю. Бизнес-правила не зависят от ASP.NET и можно юнит-тестировать без поднятия сервера.</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Почему сначала in-memory, а не сразу БД?</span>
+      <div>
+        <div class="dec-a">24-часовой таймбокс — приоритет на архитектуру и рабочий docker-compose</div>
+        <div class="dec-why">Репозитории за интерфейсами, поэтому БД — это «stage 2», добавляется без переписывания. Показываю готовность к БД, не тратя время на миграции в рамках теста.</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Зачем DTO, если есть доменные модели?</span>
+      <div>
+        <div class="dec-a">Контракт API отделён от внутренней модели</div>
+        <div class="dec-why">Можно менять домен, не ломая клиента, и наоборот. Валидация и форма ответа живут в DTO; доменная модель остаётся чистой. Плюс не отдаём наружу лишние поля.</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Где фильтрация — на клиенте или сервере?</span>
+      <div>
+        <div class="dec-a">На сервере — это в Acceptance Criteria</div>
+        <div class="dec-why">Фильтр по name/description для сценариев и по type/taskForce для сущностей делается в репозитории. Готово к переносу в SQL без смены контракта.</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Как обрабатываете ошибки?</span>
+      <div>
+        <div class="dec-a">400 на невалидный ввод, 404 на отсутствие, единый ErrorResponse</div>
+        <div class="dec-why">Форма: <code class="inline">{ message, status, errors? }</code> — поле <code class="inline">message</code> критично, его читает <code class="inline">entityService</code>. Две точки: доменные исключения ловит <code class="inline">ExceptionHandlingMiddleware</code> (<code class="inline">NotFoundException→404</code>, <code class="inline">DomainException→400</code>, прочее→500); авто-400 модель-валидации переопределён через <code class="inline">InvalidModelStateResponseFactory</code> в ту же форму (а не дефолтный ProblemDetails с <code class="inline">title</code>).</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Как гарантируете «нет сирот»?</span>
+      <div>
+        <div class="dec-a">Создание Entity проверяет существование Scenario → иначе 404</div>
+        <div class="dec-why">Сущность всегда привязана к сценарию через scenarioId в маршруте; репозиторий/сервис отклоняет создание для несуществующего сценария.</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Как запускается всё вместе?</span>
+      <div>
+        <div class="dec-a"><code class="inline">docker-compose up</code> — backend + frontend</div>
+        <div class="dec-why">Multi-stage Dockerfile для фронта (build → serve через nginx). API URL фронта и CORS-origins бэка — через переменные окружения, не хардкод.</div>
+      </div>
+    </div>
+    <div class="decision">
+      <span class="dec-q">Использовал AI при разработке?</span>
+      <div>
+        <div class="dec-a">Да — для обсуждения архитектуры, trade-offs и ускорения рутинного кода</div>
+        <div class="dec-why">Весь код просмотрен и адаптирован под задание. Решения (слои, контракт, in-memory→DB) принимал сам; AI — инструмент, как IntelliSense, а не автор архитектуры.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRICKY -->
+  <h2 class="section">Каверзные вопросы — то что реально спрашивают</h2>
+  <div class="card" style="border-color:#6d28d9;background:#120a1e">
+    <h2 style="color:#c4b5fd">ЛОВУШКИ НА ЗАЩИТЕ</h2>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">Почему путь сущностей такой странный — /api/entities/scenarios/{id}/entities?</span>
+      <div>
+        <div class="dec-a">Так задан сервисами фронта — контракт фиксирован клиентом</div>
+        <div class="dec-why">Я не проектировал URL с нуля: фронтенд-скелет уже зовёт именно этот путь (<code class="inline">entityService.ts</code>). Бэкенд обязан совпасть, иначе 404. RESTful-альтернативу (<code class="inline">/api/scenarios/{id}/entities</code>) мог бы предложить, но менять контракт = ломать данный фронт.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">In-memory + несколько потоков — нет ли гонок?</span>
+      <div>
+        <div class="dec-a">Да — состояние в <code class="inline">InMemoryStore</code> на двух <code class="inline">ConcurrentDictionary&lt;Guid, T&gt;</code></div>
+        <div class="dec-why">ASP.NET обрабатывает запросы параллельно, поэтому обычный <code class="inline">Dictionary</code>/<code class="inline">List</code> дал бы race condition. Id генерируются как <code class="inline">Guid.NewGuid()</code> в доменной фабрике, запись по ключу — атомарный индексатор словаря.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">Singleton или Scoped для репозитория?</span>
+      <div>
+        <div class="dec-a">Хранилище — Singleton, репозитории — Scoped (читают из него)</div>
+        <div class="dec-why">Состояние должно переживать запросы → <code class="inline">InMemoryStore</code> зарегистрирован как <strong style="color:#e2e8f0">Singleton</strong>. Сами репозитории <strong style="color:#e2e8f0">Scoped</strong> — так при переходе на EF Core ничего не меняется (там <code class="inline">DbContext</code> и репозиторий обязаны быть Scoped). Singleton-репозиторий, держащий Scoped <code class="inline">DbContext</code>, был бы Captive Dependency.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">Валидация enum: что если придёт type: "Banana"?</span>
+      <div>
+        <div class="dec-a">Отклоняем на этапе модель-байндинга → 400, не маппим в домен</div>
+        <div class="dec-why">Enum'ы сериализуются строками (<code class="inline">JsonStringEnumConverter</code>); неизвестное значение не парсится → <strong style="color:#e2e8f0">400</strong> (а не 500), в едином <code class="inline">ErrorResponse</code>. Latitude/Longitude — <code class="inline">[Range]</code> (-90..90 / -180..180), плюс backstop в доменной фабрике. <em>Полиш:</em> дефолтное сообщение байндера техническое — стоит заменить на дружелюбное.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">CORS или proxy? Почему относительные пути 404 в dev?</span>
+      <div>
+        <div class="dec-a">Гибрид: same-origin по умолчанию, CORS — подстраховка</div>
+        <div class="dec-why">Сервисы фронта зовут относительные <code class="inline">/api/...</code>. В dev на :5173 это ушло бы в сам Vite (404), <strong style="color:#e2e8f0">CORS тут не спасёт</strong> — запрос даже не cross-origin. Решение: <strong style="color:#e2e8f0">vite-proxy</strong> <code class="inline">/api → :5000</code> в dev и <strong style="color:#e2e8f0">nginx</strong> в Docker → браузер видит same-origin, CORS не нужен. База берётся из <code class="inline">VITE_API_BASE_URL ?? ''</code>; если выставить cross-origin URL — включается CORS-политика из ENV бэка (<code class="inline">Cors:AllowedOrigins</code>).</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">Где сортировка и как защищена от инъекции по sortBy?</span>
+      <div>
+        <div class="dec-a">sortBy — из белого списка полей, не прямая подстановка</div>
+        <div class="dec-why">Параметр <code class="inline">sortBy</code> мапится на разрешённые поля через switch/словарь; неизвестное значение → дефолт или 400. Это исключает «сортировку по произвольному выражению» и будущую SQL-инъекцию при переходе на БД.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <span class="dec-q" style="color:#a78bfa">Что если Docker не успел — это провал?</span>
+      <div>
+        <div class="dec-a">Нет — задание разрешает письменное описание контейнеризации</div>
+        <div class="dec-why">В задании прямо сказано: если Docker занимает больше времени, допустимо описать в README, как бы контейнеризировал. Но Docker помечен критичным, поэтому цель — рабочий <code class="inline">docker-compose up</code>, а текст — запасной вариант.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <h2 class="section">Конфигурация — appsettings, CORS, docker-compose</h2>
+  <div class="card">
+    <h2>Program.cs — реальная конфигурация</h2>
+    <div class="cmd-block"><span class="cmd-comment">// Строковые enum'ы — контракт фронта ("Soldier", "Friendly")</span>
+<span class="cmd-text">builder.Services.AddControllers().AddJsonOptions(o =&gt; {
+    o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});</span>
+
+<span class="cmd-comment">// Единый формат 400: авто-валидацию заворачиваем в ErrorResponse</span>
+<span class="cmd-text">builder.Services.Configure&lt;ApiBehaviorOptions&gt;(o =&gt;
+    o.InvalidModelStateResponseFactory = ctx =&gt; new BadRequestObjectResult(
+        new ErrorResponse("Validation failed.", 400, /* errors dict */)));</span>
+
+<span class="cmd-comment">// CORS origins из ENV (Cors__AllowedOrigins__0)</span>
+<span class="cmd-text">var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get&lt;string[]&gt;()
+              ?? ["http://localhost:5173"];
+builder.Services.AddCors(o =&gt; o.AddPolicy("frontend",
+    p =&gt; p.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod()));</span>
+
+<span class="cmd-comment">// DI: store=Singleton, репозитории=Scoped (см. AddInfrastructure)</span>
+<span class="cmd-text">builder.Services.AddInfrastructure();
+builder.Services.AddScoped&lt;IScenarioService, ScenarioService&gt;();
+builder.Services.AddScoped&lt;IEntityService, EntityService&gt;();</span>
+
+<span class="cmd-comment">// Pipeline: middleware ошибок первым; без UseHttpsRedirection (Docker)</span>
+<span class="cmd-text">app.UseMiddleware&lt;ExceptionHandlingMiddleware&gt;();
+app.UseCors("frontend");
+app.MapControllers();</span></div>
+  </div>
+  <div class="card">
+    <h2>docker-compose.yml — оба сервиса вместе</h2>
+    <div class="cmd-block"><span class="cmd-comment"># backend слушает порт, frontend (nginx) проксирует/знает API URL через ENV</span>
+<span class="cmd-text">services:
+  backend:
+    build: ./backend
+    environment:
+      - Cors__Origin=http://localhost:8080
+    ports: ["5000:8080"]
+  frontend:
+    build: ./frontend/fronntend-react   # multi-stage: build -&gt; serve
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
+    ports: ["8080:80"]
+    depends_on: [backend]</span></div>
+    <div style="margin-top:0.6rem;font-size:0.78rem;color:#475569">
+      <span class="chip warn">в плане</span> Docker ещё не собран — порты/образы финализируются после написания Dockerfile-ов и nginx.conf.
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <h2 class="section">Acceptance Criteria — чеклист перед сдачей</h2>
+  <div class="card">
+    <span class="chip ok">создать сценарий → виден в списке</span>
+    <span class="chip ok">детали сценария → только его сущности</span>
+    <span class="chip ok">TaskForce выбирается и отображается</span>
+    <span class="chip ok">фильтр сценариев по name/description (server-side)</span>
+    <span class="chip ok">фильтр сущностей по Type/TaskForce (server-side)</span>
+    <span class="chip ok">валидация всех полей</span>
+    <span class="chip ok">корректные HTTP-коды</span>
+    <span class="chip ok">персистентность (in-memory)</span>
+    <span class="chip ok">запуск локально</span>
+    <span class="chip ok">bonus: search (готово)</span>
+    <span class="chip ok">bonus: сортировка (готово)</span>
+    <span class="chip ok">bonus: Update/Delete (готово, каскад на сценарии)</span>
+    <span class="chip blue">bonus: тесты валидации</span>
+  </div>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
-import { Scenario, CreateScenarioPayload } from '../types';
+import { Scenario, CreateScenarioPayload, UpdateScenarioPayload } from '../types';
+import { API_BASE } from './apiConfig';
 
 export interface ScenarioFilterParams {
   name?: string;
@@ -11,14 +12,26 @@ export interface ScenarioFilterParams {
  * Service for managing Scenarios
  */
 class ScenarioService {
-  private readonly baseUrl = '/api/scenarios';
+  private readonly baseUrl = `${API_BASE}/api/scenarios`;
 
   /**
    * Get all scenarios with optional filtering and sorting
-   * TODO(candidate): Implement real API call
    */
   async listScenarios(filters?: ScenarioFilterParams): Promise<Scenario[]> {
-    throw new Error('NOT_IMPLEMENTED');
+    const params = new URLSearchParams();
+    if (filters?.name) params.append('name', filters.name);
+    if (filters?.description) params.append('description', filters.description);
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy);
+    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
+
+    const query = params.toString();
+    const url = query ? `${this.baseUrl}?${query}` : this.baseUrl;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch scenarios: ${response.statusText}`);
+    }
+    return response.json();
   }
 
   /**
@@ -37,10 +50,49 @@ class ScenarioService {
 
   /**
    * Create a new scenario
-   * TODO(candidate): Implement real API call
    */
   async createScenario(payload: CreateScenarioPayload): Promise<Scenario> {
-    throw new Error('NOT_IMPLEMENTED');
+    const response = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || `Failed to create scenario: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * Update an existing scenario
+   */
+  async updateScenario(id: string, payload: UpdateScenarioPayload): Promise<Scenario> {
+    const response = await fetch(`${this.baseUrl}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || `Failed to update scenario: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * Delete a scenario (cascades to its entities)
+   */
+  async deleteScenario(id: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/${id}`, { method: 'DELETE' });
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || `Failed to delete scenario: ${response.statusText}`);
+    }
   }
 }
 

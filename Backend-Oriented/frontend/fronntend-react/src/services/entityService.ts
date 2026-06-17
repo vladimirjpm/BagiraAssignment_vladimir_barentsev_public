@@ -1,4 +1,5 @@
-import { Entity, CreateEntityPayload } from '../types';
+import { Entity, CreateEntityPayload, UpdateEntityPayload } from '../types';
+import { API_BASE } from './apiConfig';
 
 export interface EntityFilterParams {
   type?: string;
@@ -11,7 +12,7 @@ export interface EntityFilterParams {
  * Service for managing Entities
  */
 class EntityService {
-  private readonly baseUrl = '/api';
+  private readonly baseUrl = `${API_BASE}/api`;
 
   /**
    * Get all entities for a specific scenario with optional filtering and sorting
@@ -65,6 +66,35 @@ class EntityService {
       throw new Error(error?.message || `Failed to create entity: ${response.statusText}`);
     }
     return response.json();
+  }
+
+  /**
+   * Update an existing entity
+   */
+  async updateEntity(id: string, payload: UpdateEntityPayload): Promise<Entity> {
+    const response = await fetch(`${this.baseUrl}/entities/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || `Failed to update entity: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * Delete an entity
+   */
+  async deleteEntity(id: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/entities/${id}`, { method: 'DELETE' });
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(error?.message || `Failed to delete entity: ${response.statusText}`);
+    }
   }
 }
 

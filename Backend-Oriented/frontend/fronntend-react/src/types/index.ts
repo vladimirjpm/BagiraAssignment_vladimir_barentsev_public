@@ -36,3 +36,6 @@ export interface CreateEntityPayload {
   latitude: number;
   longitude: number;
 }
+
+export type UpdateScenarioPayload = CreateScenarioPayload;
+export type UpdateEntityPayload = CreateEntityPayload;

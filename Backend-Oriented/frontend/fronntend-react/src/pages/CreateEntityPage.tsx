@@ -3,17 +3,20 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { entityService } from '../services/entityService';
 import { EntityType, TaskForce } from '../types';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { LoadingIndicator } from '../components/ui/LoadingIndicator';
 import './CreateEntityPage.css';
 
 const ENTITY_TYPES: EntityType[] = ['Soldier', 'Tank', 'Drone', 'Aircraft', 'Vehicle', 'Civilian'];
 const TASK_FORCES: TaskForce[] = ['Friendly', 'Enemy'];
 
 /**
- * Create Entity Page
+ * Create / Edit Entity Page.
+ * Edit mode is entered via /scenarios/:scenarioId/entities/:entityId/edit.
  */
 export const CreateEntityPage: React.FC = () => {
   const navigate = useNavigate();
-  const { scenarioId } = useParams<{ scenarioId: string }>();
+  const { scenarioId, entityId } = useParams<{ scenarioId: string; entityId?: string }>();
+  const isEditMode = Boolean(entityId);
   const [type, setType] = useState<EntityType>('Soldier');
   const [taskForce, setTaskForce] = useState<TaskForce>('Friendly');
   const [name, setName] = useState('');
@@ -22,6 +25,7 @@ export const CreateEntityPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(isEditMode);
 
   useEffect(() => {
     if (!scenarioId) {
@@ -29,6 +33,29 @@ export const CreateEntityPage: React.FC = () => {
       setTimeout(() => navigate('/scenarios'), 2000);
     }
   }, [scenarioId, navigate]);
+
+  useEffect(() => {
+    if (!entityId) return;
+
+    const loadEntity = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const entity = await entityService.getEntity(entityId);
+        setType(entity.type);
+        setTaskForce(entity.taskForce);
+        setName(entity.name);
+        setLatitude(String(entity.latitude));
+        setLongitude(String(entity.longitude));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load entity');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEntity();
+  }, [entityId]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -70,19 +97,24 @@ export const CreateEntityPage: React.FC = () => {
     setError(null);
 
     try {
-      await entityService.createEntity(scenarioId, {
+      const payload = {
         type,
         taskForce,
         name,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
-      });
+      };
+      if (isEditMode) {
+        await entityService.updateEntity(entityId!, payload);
+      } else {
+        await entityService.createEntity(scenarioId, payload);
+      }
       navigate(`/scenarios/${scenarioId}`);
     } catch (err: any) {
       if (err.message?.includes('validation')) {
         setError(err.message);
       } else {
-        setError('Failed to create entity');
+        setError(`Failed to ${isEditMode ? 'update' : 'create'} entity`);
       }
     } finally {
       setSubmitting(false);
@@ -97,10 +129,14 @@ export const CreateEntityPage: React.FC = () => {
     );
   }
 
+  if (loading) {
+    return <LoadingIndicator />;
+  }
+
   return (
     <div className="create-entity-page">
       <div className="page-header">
-        <h1>Add Entity</h1>
+        <h1>{isEditMode ? 'Edit Entity' : 'Add Entity'}</h1>
       </div>
 
       {error && <ErrorBanner message={error} />}

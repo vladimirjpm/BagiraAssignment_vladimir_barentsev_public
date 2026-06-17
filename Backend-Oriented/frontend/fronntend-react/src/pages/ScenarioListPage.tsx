@@ -67,6 +67,18 @@ export const ScenarioListPage: React.FC = () => {
     return sortOrder === 'asc' ? ' ↑' : ' ↓';
   };
 
+  const handleDelete = async (scenario: Scenario) => {
+    if (!window.confirm(`Delete scenario "${scenario.name}" and all its entities?`)) {
+      return;
+    }
+    try {
+      await scenarioService.deleteScenario(scenario.id);
+      await fetchScenarios();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete scenario');
+    }
+  };
+
   return (
     <div className="scenario-list-page">
       <div className="page-header">
@@ -144,12 +156,24 @@ export const ScenarioListPage: React.FC = () => {
                       ? new Date(scenario.updatedAt).toLocaleDateString()
                       : '-'}
                   </td>
-                  <td>
+                  <td className="action-buttons">
                     <button
                       className="action-button view"
                       onClick={() => navigate(`/scenarios/${scenario.id}`)}
                     >
                       View
+                    </button>
+                    <button
+                      className="action-button edit"
+                      onClick={() => navigate(`/scenarios/${scenario.id}/edit`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="action-button delete"
+                      onClick={() => handleDelete(scenario)}
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>

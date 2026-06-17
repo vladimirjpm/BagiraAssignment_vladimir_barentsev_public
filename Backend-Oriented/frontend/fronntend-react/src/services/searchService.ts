@@ -1,4 +1,5 @@
 import { Scenario, Entity } from '../types';
+import { API_BASE } from './apiConfig';
 
 export interface SearchResult {
   scenarios: Scenario[];
@@ -9,7 +10,7 @@ export interface SearchResult {
  * Service for global search across scenarios and entities
  */
 class SearchService {
-  private readonly baseUrl = '/api/search';
+  private readonly baseUrl = `${API_BASE}/api/search`;
 
   /**
    * Search across scenarios and entities

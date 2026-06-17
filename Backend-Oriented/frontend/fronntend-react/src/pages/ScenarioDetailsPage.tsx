@@ -113,6 +113,18 @@ export const ScenarioDetailsPage: React.FC = () => {
     return sortOrder === 'asc' ? ' ↑' : ' ↓';
   };
 
+  const handleDeleteEntity = async (entity: Entity) => {
+    if (!window.confirm(`Delete entity "${entity.name}"?`)) {
+      return;
+    }
+    try {
+      await entityService.deleteEntity(entity.id);
+      await loadEntities();
+    } catch (err) {
+      setEntitiesError(err instanceof Error ? err.message : 'Failed to delete entity');
+    }
+  };
+
   if (loading) {
     return <LoadingIndicator />;
   }
@@ -142,6 +154,12 @@ export const ScenarioDetailsPage: React.FC = () => {
             <p className="scenario-description">{scenario.description}</p>
           )}
         </div>
+        <button
+          className="action-button edit"
+          onClick={() => navigate(`/scenarios/${id}/edit`)}
+        >
+          Edit Scenario
+        </button>
       </div>
 
       <div className="entities-section">
@@ -234,6 +252,7 @@ export const ScenarioDetailsPage: React.FC = () => {
                   <th className="sortable-header" onClick={() => handleSort('updatedAt')}>
                     Updated At{getSortIndicator('updatedAt')}
                   </th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,6 +267,20 @@ export const ScenarioDetailsPage: React.FC = () => {
                       {entity.updatedAt
                         ? new Date(entity.updatedAt).toLocaleDateString()
                         : '-'}
+                    </td>
+                    <td className="action-buttons">
+                      <button
+                        className="action-button edit"
+                        onClick={() => navigate(`/scenarios/${id}/entities/${entity.id}/edit`)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="action-button delete"
+                        onClick={() => handleDeleteEntity(entity)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}

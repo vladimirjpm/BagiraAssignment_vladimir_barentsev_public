@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { ScenarioListPage } from './pages/ScenarioListPage';
@@ -32,7 +31,23 @@ function App() {
               }
             />
             <Route
+              path="/scenarios/:id/edit"
+              element={
+                <ScenarioGuard>
+                  <CreateScenarioPage />
+                </ScenarioGuard>
+              }
+            />
+            <Route
               path="/scenarios/:scenarioId/entities/new"
+              element={
+                <EntityGuard>
+                  <CreateEntityPage />
+                </EntityGuard>
+              }
+            />
+            <Route
+              path="/scenarios/:scenarioId/entities/:entityId/edit"
               element={
                 <EntityGuard>
                   <CreateEntityPage />
